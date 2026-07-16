@@ -39,8 +39,8 @@ alter table public.beacons add column if not exists created_by_name text;
 
 alter table public.beacons enable row level security;
 
--- Both of you are authenticated users of the same project, so everyone
--- authenticated can read/write every row. Two users, one shared space.
+-- Everyone authenticated can read every beacon (shared visibility), but only
+-- the person who created a beacon can edit or delete it.
 drop policy if exists "authenticated read" on public.beacons;
 create policy "authenticated read"
   on public.beacons for select
@@ -48,22 +48,25 @@ create policy "authenticated read"
   using (true);
 
 drop policy if exists "authenticated insert" on public.beacons;
-create policy "authenticated insert"
+drop policy if exists "owner insert" on public.beacons;
+create policy "owner insert"
   on public.beacons for insert
   to authenticated
-  with check (true);
+  with check (created_by = auth.uid());
 
 drop policy if exists "authenticated update" on public.beacons;
-create policy "authenticated update"
+drop policy if exists "owner update" on public.beacons;
+create policy "owner update"
   on public.beacons for update
   to authenticated
-  using (true);
+  using (created_by = auth.uid());
 
 drop policy if exists "authenticated delete" on public.beacons;
-create policy "authenticated delete"
+drop policy if exists "owner delete" on public.beacons;
+create policy "owner delete"
   on public.beacons for delete
   to authenticated
-  using (true);
+  using (created_by = auth.uid());
 
 -- Keep updated_at fresh automatically.
 create or replace function public.set_updated_at()
@@ -111,11 +114,14 @@ create policy "anyone can view screenshots"
   on storage.objects for select
   using (bucket_id = 'screenshots');
 
+-- Only the uploader can delete their own screenshot file (mirrors the
+-- owner-only delete policy on the beacons table above).
 drop policy if exists "authenticated delete screenshots" on storage.objects;
-create policy "authenticated delete screenshots"
+drop policy if exists "owner delete screenshots" on storage.objects;
+create policy "owner delete screenshots"
   on storage.objects for delete
   to authenticated
-  using (bucket_id = 'screenshots');
+  using (bucket_id = 'screenshots' and owner = auth.uid());
 
 -- Done. Next steps:
 --   1. Project Settings → API: copy the "Project URL" and "anon public" key.

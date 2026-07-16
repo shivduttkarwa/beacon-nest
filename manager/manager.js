@@ -33,6 +33,7 @@ let allBeacons = [];
 let filtered = [];
 let unsubscribeRealtime = null;
 let selectedPerson = "";
+let currentUserId = null;
 
 const PERSON_HUES = [252, 168, 12, 292, 200, 42, 330, 96];
 function personColor(name) {
@@ -155,6 +156,8 @@ async function render() {
   empty.classList.toggle("hidden", allBeacons.length !== 0);
 
   for (const b of filtered) {
+    const isOwner = !!currentUserId && b.createdBy === currentUserId;
+
     const card = document.createElement("div");
     card.className = "card";
     card.dataset.id = b.id;
@@ -191,22 +194,28 @@ async function render() {
     const desc = document.createElement("textarea");
     desc.className = "card__desc";
     desc.value = b.description || "";
-    desc.placeholder = "Add a note…";
-    let saveTimer = null;
-    desc.addEventListener("input", () => {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(async () => {
-        try {
-          await beaconnestUpdateBeacon(b.id, { description: desc.value.trim() });
-          b.description = desc.value.trim();
-          const hint = card.querySelector(".save-hint");
-          hint.classList.add("show");
-          setTimeout(() => hint.classList.remove("show"), 900);
-        } catch (err) {
-          console.error("BeaconNest update failed:", err);
-        }
-      }, 500);
-    });
+    desc.placeholder = isOwner ? "Add a note…" : "No note";
+    if (isOwner) {
+      let saveTimer = null;
+      desc.addEventListener("input", () => {
+        clearTimeout(saveTimer);
+        saveTimer = setTimeout(async () => {
+          try {
+            await beaconnestUpdateBeacon(b.id, { description: desc.value.trim() });
+            b.description = desc.value.trim();
+            const hint = card.querySelector(".save-hint");
+            hint.classList.add("show");
+            setTimeout(() => hint.classList.remove("show"), 900);
+          } catch (err) {
+            console.error("BeaconNest update failed:", err);
+          }
+        }, 500);
+      });
+    } else {
+      desc.readOnly = true;
+      desc.classList.add("card__desc--readonly");
+      desc.title = "Only the person who saved this beacon can edit it";
+    }
 
     const meta = document.createElement("div");
     meta.className = "card__meta";
@@ -232,30 +241,41 @@ async function render() {
 
     const actions = document.createElement("div");
     actions.className = "card__actions";
+    if (!isOwner) actions.classList.add("card__actions--view-only");
 
     const goBtn = document.createElement("button");
     goBtn.className = "btn-go";
     goBtn.textContent = "Go there";
     goBtn.addEventListener("click", () => goToBeacon(b));
 
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn-delete";
-    delBtn.textContent = "Delete";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this beacon? This can't be undone.")) return;
-      try {
-        await beaconnestDeleteBeacon(b.id, b.screenshotPath);
-        allBeacons = allBeacons.filter((x) => x.id !== b.id);
-        populatePersonFilter();
-        applyFilter();
-      } catch (err) {
-        console.error("BeaconNest delete failed:", err);
-        alert("Couldn't delete that beacon: " + (err.message || "unknown error"));
-      }
-    });
-
     actions.appendChild(goBtn);
-    actions.appendChild(delBtn);
+
+    if (!isOwner) {
+      const lockNote = document.createElement("span");
+      lockNote.className = "card__lock-note";
+      lockNote.innerHTML =
+        '<svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><rect x="4.5" y="9" width="11" height="8" rx="1.8" stroke="currentColor" stroke-width="1.5"/><path d="M6.5 9V6.5a3.5 3.5 0 0 1 7 0V9" stroke="currentColor" stroke-width="1.5"/></svg><span>View only</span>';
+      actions.appendChild(lockNote);
+    }
+
+    if (isOwner) {
+      const delBtn = document.createElement("button");
+      delBtn.className = "btn-delete";
+      delBtn.textContent = "Delete";
+      delBtn.addEventListener("click", async () => {
+        if (!confirm("Delete this beacon? This can't be undone.")) return;
+        try {
+          await beaconnestDeleteBeacon(b.id, b.screenshotPath);
+          allBeacons = allBeacons.filter((x) => x.id !== b.id);
+          populatePersonFilter();
+          applyFilter();
+        } catch (err) {
+          console.error("BeaconNest delete failed:", err);
+          alert("Couldn't delete that beacon: " + (err.message || "unknown error"));
+        }
+      });
+      actions.appendChild(delBtn);
+    }
 
     body.appendChild(title);
     body.appendChild(url);
@@ -343,6 +363,7 @@ async function refreshConnectionUI() {
 
   const session = await beaconnestGetSession().catch(() => null);
   if (!session) {
+    currentUserId = null;
     authBlock.classList.remove("hidden");
     notConnected.classList.remove("hidden");
     grid.classList.add("hidden");
@@ -350,6 +371,7 @@ async function refreshConnectionUI() {
     return false;
   }
 
+  currentUserId = session.user.id;
   signedInBlock.classList.remove("hidden");
   signedInEmail.textContent = session.user.email;
   settingsPanel.classList.add("hidden");
