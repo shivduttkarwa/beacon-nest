@@ -9,6 +9,49 @@ const personDropdownLabel = document.getElementById("personDropdownLabel");
 const personDropdownMenu = document.getElementById("personDropdownMenu");
 const exportBtn = document.getElementById("exportBtn");
 
+const modalOverlay = document.getElementById("modalOverlay");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalCancelBtn = document.getElementById("modalCancelBtn");
+const modalConfirmBtn = document.getElementById("modalConfirmBtn");
+
+function showModal({ title, message, confirmLabel = "OK", danger = false, showCancel = true }) {
+  return new Promise((resolve) => {
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modalConfirmBtn.textContent = confirmLabel;
+    modalConfirmBtn.classList.toggle("modal__confirm-btn--danger", danger);
+    modalCancelBtn.classList.toggle("hidden", !showCancel);
+    modalOverlay.classList.remove("hidden");
+
+    function cleanup(result) {
+      modalOverlay.classList.add("hidden");
+      modalConfirmBtn.removeEventListener("click", onConfirm);
+      modalCancelBtn.removeEventListener("click", onCancel);
+      modalOverlay.removeEventListener("mousedown", onOverlayClick);
+      document.removeEventListener("keydown", onKeydown);
+      resolve(result);
+    }
+    function onConfirm() { cleanup(true); }
+    function onCancel() { cleanup(false); }
+    function onOverlayClick(e) { if (e.target === modalOverlay) cleanup(false); }
+    function onKeydown(e) { if (e.key === "Escape") cleanup(false); }
+
+    modalConfirmBtn.addEventListener("click", onConfirm);
+    modalCancelBtn.addEventListener("click", onCancel);
+    modalOverlay.addEventListener("mousedown", onOverlayClick);
+    document.addEventListener("keydown", onKeydown);
+  });
+}
+
+function beaconnestConfirm(title, message) {
+  return showModal({ title, message, confirmLabel: "Delete", danger: true, showCancel: true });
+}
+
+function beaconnestAlert(title, message) {
+  return showModal({ title, message, confirmLabel: "OK", danger: false, showCancel: false });
+}
+
 const settingsToggle = document.getElementById("settingsToggle");
 const settingsPanel = document.getElementById("settingsPanel");
 const nameBlock = document.getElementById("settings-name");
@@ -263,7 +306,8 @@ async function render() {
       delBtn.className = "btn-delete";
       delBtn.textContent = "Delete";
       delBtn.addEventListener("click", async () => {
-        if (!confirm("Delete this beacon? This can't be undone.")) return;
+        const confirmed = await beaconnestConfirm("Delete this beacon?", "This can't be undone.");
+        if (!confirmed) return;
         try {
           await beaconnestDeleteBeacon(b.id, b.screenshotPath);
           allBeacons = allBeacons.filter((x) => x.id !== b.id);
@@ -271,7 +315,7 @@ async function render() {
           applyFilter();
         } catch (err) {
           console.error("BeaconNest delete failed:", err);
-          alert("Couldn't delete that beacon: " + (err.message || "unknown error"));
+          await beaconnestAlert("Couldn't delete that beacon", err.message || "Unknown error.");
         }
       });
       actions.appendChild(delBtn);
