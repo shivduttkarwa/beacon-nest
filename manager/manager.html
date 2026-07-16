@@ -92,17 +92,43 @@
 
     <p id="count" class="count muted"></p>
     <div id="notConnected" class="empty hidden">
-      <p>Not connected yet.</p>
-      <p class="muted small">Open <strong>Connection</strong> above to link your Supabase project and sign in — that's what lets you and your colleague see each other's beacons instantly.</p>
+      <div class="empty__art" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" fill="#eeedfd"/>
+          <path d="M32 14c-7.1 0-12.8 5.5-12.8 12.3 0 8.7 9.5 15.5 12 17.1.5.3 1.2.3 1.7 0 2.5-1.6 12-8.4 12-17.1C44.8 19.5 39.1 14 32 14Z" fill="#4f46e5" opacity="0.35"/>
+          <circle cx="32" cy="26" r="5" fill="#fff"/>
+          <circle cx="32" cy="26" r="2.2" fill="#2DD4BF"/>
+        </svg>
+      </div>
+      <p class="empty__title">Not connected yet</p>
+      <p class="muted small">Open <strong>Connection</strong> above to link your Supabase project and sign in — that's what lets you and your teammates see each other's beacons instantly.</p>
     </div>
 
     <div id="empty" class="empty hidden">
-      <p>No beacons saved yet.</p>
-      <p class="muted small">Click the BeaconNest icon in your toolbar while on any page to save the exact spot you're looking at.</p>
+      <div class="empty__art" aria-hidden="true">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="30" fill="#eeedfd"/>
+          <path d="M32 12c-8 0-14.4 6.2-14.4 13.8 0 9.8 10.7 17.4 13.5 19.2.6.4 1.3.4 1.9 0 2.8-1.8 13.5-9.4 13.5-19.2C46.4 18.2 40 12 32 12Z" fill="url(#emptyPinGrad)"/>
+          <circle cx="32" cy="25.5" r="5.4" fill="#fff"/>
+          <circle cx="32" cy="25.5" r="2.4" fill="#2DD4BF"/>
+          <path d="M40.5 17.5c2.4 1.6 4 4.3 4 7.3" stroke="#2DD4BF" stroke-width="2" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="emptyPinGrad" x1="20" y1="14" x2="44" y2="46" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#6366F1"/>
+              <stop offset="1" stop-color="#4338CA"/>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+      <p class="empty__title">Your nest is empty</p>
+      <p class="muted small">Find something worth keeping, then click the BeaconNest icon in your toolbar — it saves the exact spot on the page, not just the page.</p>
+      <p class="empty__hint">Tip: select some text first for the most precise anchor.</p>
     </div>
 
     <div id="grid" class="grid"></div>
   </div>
+
+  <div id="toasts" class="toasts" aria-live="polite"></div>
 
   <div id="modalOverlay" class="modal-overlay hidden">
     <div class="modal" role="alertdialog" aria-modal="true" aria-labelledby="modalTitle">

@@ -1,3 +1,20 @@
+@font-face {
+  font-family: "InterVariable";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "InterVariable";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("../fonts/inter-latin-ext-wght-normal.woff2") format("woff2-variations");
+  unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
 :root {
   --ink: #1c1d27;
   --paper: #f5f5fb;
@@ -27,7 +44,9 @@ body {
     radial-gradient(700px 380px at 100% 0%, rgba(20, 184, 166, 0.08), transparent 55%),
     var(--paper);
   color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: "InterVariable", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
 }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 24px 60px; }
@@ -220,15 +239,115 @@ body {
 .small { font-size: 11.5px; }
 
 .empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  padding: 64px 20px;
-  border: 1px dashed var(--border);
-  border-radius: 16px;
+  padding: 56px 20px 60px;
+  border-radius: 20px;
   margin-top: 20px;
-  background: rgba(255,255,255,0.5);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border);
 }
 .empty.hidden { display: none; }
-.empty p:first-child { font-weight: 600; font-size: 14.5px; margin: 0 0 6px; }
+
+.empty__art {
+  width: 84px;
+  height: 84px;
+  margin-bottom: 14px;
+}
+.empty__art svg { width: 100%; height: 100%; }
+
+.empty__title {
+  font-weight: 700;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+  margin: 0 0 6px;
+}
+
+.empty .small { max-width: 420px; line-height: 1.55; }
+
+.empty__hint {
+  margin: 14px 0 0;
+  font-size: 11.5px;
+  color: var(--primary-dark);
+  background: var(--primary-light);
+  padding: 6px 12px;
+  border-radius: 999px;
+}
+
+/* --- Skeleton loading ------------------------------------------------------ */
+
+.skel-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.skel-card__thumb { aspect-ratio: 16 / 10; }
+.skel-card__body { padding: 13px 14px 16px; display: flex; flex-direction: column; gap: 9px; }
+.skel-line { height: 12px; border-radius: 6px; }
+.skel-line--w60 { width: 60%; }
+.skel-line--w80 { width: 80%; }
+.skel-line--tall { height: 40px; border-radius: 8px; }
+
+.skel {
+  background: linear-gradient(
+    100deg,
+    #edeef5 40%,
+    #f6f7fc 50%,
+    #edeef5 60%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+@keyframes shimmer {
+  from { background-position: 120% 0; }
+  to { background-position: -80% 0; }
+}
+
+/* --- Toasts ---------------------------------------------------------------- */
+
+.toasts {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #23243a;
+  color: #f2f2fa;
+  font-size: 12.5px;
+  font-weight: 550;
+  padding: 10px 14px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px -6px rgba(20, 16, 60, 0.35);
+  animation: toast-in 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.toast--leaving { opacity: 0; transform: translateY(6px); }
+
+.toast__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex: 0 0 auto;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 
 .settings-panel {
   border: 1px solid var(--border);
@@ -352,7 +471,15 @@ body {
   object-fit: cover;
   display: block;
   cursor: pointer;
+  opacity: 0;
+  transform: scale(1.02);
+  transition: opacity 0.35s ease, transform 0.45s ease;
 }
+.card__thumb--loaded {
+  opacity: 1;
+  transform: scale(1);
+}
+
 .card__cat {
   position: absolute;
   top: 9px;

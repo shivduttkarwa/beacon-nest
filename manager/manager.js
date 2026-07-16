@@ -90,6 +90,42 @@ function categoryBg(cat) {
   return `hsl(${cat.hue} 85% 95%)`;
 }
 
+// --- Toasts ----------------------------------------------------------------
+
+const toastsEl = document.getElementById("toasts");
+
+function showToast(message) {
+  const toast = document.createElement("div");
+  toast.className = "toast";
+  const dot = document.createElement("span");
+  dot.className = "toast__dot";
+  toast.appendChild(dot);
+  toast.appendChild(document.createTextNode(message));
+  toastsEl.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("toast--leaving");
+    setTimeout(() => toast.remove(), 350);
+  }, 2800);
+}
+
+// --- Skeleton loading --------------------------------------------------------
+
+function renderSkeletons(n = 8) {
+  grid.innerHTML = "";
+  for (let i = 0; i < n; i++) {
+    const card = document.createElement("div");
+    card.className = "skel-card";
+    card.innerHTML =
+      '<div class="skel skel-card__thumb"></div>' +
+      '<div class="skel-card__body">' +
+      '<div class="skel skel-line skel-line--w80"></div>' +
+      '<div class="skel skel-line skel-line--w60"></div>' +
+      '<div class="skel skel-line skel-line--tall"></div>' +
+      "</div>";
+    grid.appendChild(card);
+  }
+}
+
 const PERSON_HUES = [252, 168, 12, 292, 200, 42, 330, 96];
 function personColor(name) {
   let hash = 0;
@@ -316,6 +352,7 @@ async function render() {
     thumbWrap.appendChild(catChip);
     thumbWrap.addEventListener("click", () => goToBeacon(b));
 
+    img.addEventListener("load", () => img.classList.add("card__thumb--loaded"));
     beaconnestScreenshotUrl(b.screenshotPath).then((url) => {
       if (url) img.src = url;
     });
@@ -412,6 +449,7 @@ async function render() {
           allBeacons = allBeacons.filter((x) => x.id !== b.id);
           refreshFilters();
           applyFilter();
+          showToast("Beacon deleted");
         } catch (err) {
           console.error("BeaconNest delete failed:", err);
           await beaconnestAlert("Couldn't delete that beacon", err.message || "Unknown error.");
@@ -490,6 +528,9 @@ function handleRealtimeChange(eventType, newRow, oldRow) {
       allBeacons.unshift(b);
       refreshFilters();
       applyFilter();
+      if (b.createdBy && b.createdBy !== currentUserId) {
+        showToast(`${b.createdByName || b.createdByEmail || "Someone"} dropped a beacon`);
+      }
     }
   } else if (eventType === "UPDATE") {
     const b = beaconnestRowToBeacon(newRow);
@@ -543,12 +584,14 @@ async function refreshConnectionUI() {
 }
 
 async function loadBeaconsAndSubscribe() {
+  renderSkeletons();
   try {
     allBeacons = await beaconnestGetAllBeacons();
     refreshFilters();
     applyFilter();
   } catch (err) {
     console.error("BeaconNest load failed:", err);
+    grid.innerHTML = "";
   }
   if (unsubscribeRealtime) unsubscribeRealtime();
   unsubscribeRealtime = await beaconnestSubscribe(handleRealtimeChange).catch((err) => {
@@ -623,6 +666,7 @@ exportBtn.addEventListener("click", () => {
   a.download = `beaconnest-beacons-${new Date().toISOString().slice(0, 10)}.csv`;
   a.click();
   URL.revokeObjectURL(url);
+  showToast(`Exported ${allBeacons.length} beacon${allBeacons.length === 1 ? "" : "s"} to CSV`);
 });
 
 init();

@@ -37,6 +37,7 @@ function setCategory(slug) {
   const cat = beaconnestCategory(slug);
   els.categoryValue.textContent = cat.label;
   els.categoryDot.style.background = categoryDotColor(cat);
+  els.saveBtn.style.setProperty("--cat-color", categoryDotColor(cat));
   els.categoryMenu.querySelectorAll(".dropdown__option").forEach((opt) => {
     opt.setAttribute("aria-selected", String(opt.dataset.value === slug));
   });
@@ -214,6 +215,9 @@ async function handleSave() {
 }
 
 els.saveBtn.addEventListener("click", handleSave);
+els.description.addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") handleSave();
+});
 els.saveNameBtn.addEventListener("click", handleSaveName);
 els.nameInput.addEventListener("keydown", (e) => {
   if (e.key === "Enter") handleSaveName();
