@@ -1,53 +1,48 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
-  <title id="title">BeaconNest logo</title>
-  <desc id="desc">A polished teal beacon pin with a warm light nested inside.</desc>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="mark" x1="14" y1="8" x2="50" y2="58" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#18B69F"/>
-      <stop offset="0.48" stop-color="#0F7B6C"/>
-      <stop offset="1" stop-color="#063E3A"/>
+    <linearGradient id="beaconGradient" x1="126" y1="100" x2="386" y2="412" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#4338CA"/>
     </linearGradient>
-    <radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="matrix(0 18 -18 0 32 25)" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFF9CC"/>
-      <stop offset="0.34" stop-color="#F8D75E" stop-opacity="0.95"/>
-      <stop offset="1" stop-color="#F8D75E" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="gold" x1="24" y1="18" x2="43" y2="48" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFF2A8"/>
-      <stop offset="0.54" stop-color="#F8D75E"/>
-      <stop offset="1" stop-color="#CF8D2C"/>
-    </linearGradient>
-    <linearGradient id="cream" x1="21" y1="34" x2="45" y2="47" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#F4EFE1"/>
-    </linearGradient>
-    <filter id="lift" x="5" y="2" width="54" height="60" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="3" stdDeviation="2.4" flood-color="#062F2D" flood-opacity="0.34"/>
-    </filter>
   </defs>
 
+  <!-- Main beacon / saved-location shape -->
   <path
-    d="M32 4.5c-12.65 0-22.75 9.7-22.75 21.75 0 14.05 15.7 27.45 22.75 32.75 7.05-5.3 22.75-18.7 22.75-32.75C54.75 14.2 44.65 4.5 32 4.5Z"
-    fill="url(#mark)"
-    filter="url(#lift)"
-  />
-  <path
-    d="M32 8.75c-10.25 0-18.55 7.75-18.55 17.45 0 10.9 10.6 22 18.55 28.55 7.95-6.55 18.55-17.65 18.55-28.55 0-9.7-8.3-17.45-18.55-17.45Z"
-    fill="none"
-    stroke="#FFFFFF"
-    stroke-opacity="0.18"
-    stroke-width="1.5"
+    d="M256 72C165.4 72 92 142.2 92 228.8C92 340.2 213.5 426.5 245.2 447.3C251.7 451.6 260.3 451.6 266.8 447.3C298.5 426.5 420 340.2 420 228.8C420 142.2 346.6 72 256 72Z"
+    fill="url(#beaconGradient)"
   />
 
-  <circle cx="32" cy="25" r="18" fill="url(#light)"/>
-  <path d="M31.95 12.25l4.9 11.3h-9.8l4.9-11.3Z" fill="#FFF4B8" opacity="0.92"/>
-  <path d="M19.4 20.15l9.6 5.1-7.8 4.6-1.8-9.7Z" fill="#FFF2A8" opacity="0.38"/>
-  <path d="M44.6 20.15l-9.6 5.1 7.8 4.6 1.8-9.7Z" fill="#FFF2A8" opacity="0.38"/>
+  <!-- Nest / anchor cradle -->
+  <path
+    d="M170 296C193.5 325.3 222.2 340 256 340C289.8 340 318.5 325.3 342 296"
+    stroke="white"
+    stroke-width="24"
+    stroke-linecap="round"
+  />
+  <path
+    d="M197 272C213.2 288 232.9 296 256 296C279.1 296 298.8 288 315 272"
+    stroke="white"
+    stroke-width="18"
+    stroke-linecap="round"
+    opacity="0.72"
+  />
 
-  <circle cx="32" cy="25.5" r="8.6" fill="url(#gold)"/>
-  <circle cx="32" cy="25.5" r="3.6" fill="#FFFCE2"/>
+  <!-- Exact anchor point -->
+  <circle cx="256" cy="220" r="48" fill="white"/>
+  <circle cx="256" cy="220" r="20" fill="#2DD4BF"/>
 
-  <path d="M23.4 37.2c3.7-3.75 13.5-3.75 17.2 0" stroke="url(#cream)" stroke-linecap="round" stroke-width="4.5"/>
-  <path d="M18.8 42.15c5.85 6.65 20.55 6.65 26.4 0" stroke="url(#cream)" stroke-linecap="round" stroke-width="4.3"/>
-  <path d="M22.85 48.2c4.65 3.3 13.65 3.3 18.3 0" stroke="url(#gold)" stroke-linecap="round" stroke-width="3.6"/>
+  <!-- Live beacon signal -->
+  <path
+    d="M331 138C355.8 154.4 372.2 182.6 372.2 214.6"
+    stroke="#2DD4BF"
+    stroke-width="20"
+    stroke-linecap="round"
+  />
+  <path
+    d="M343 102C382.2 127.4 408 171.6 408 222"
+    stroke="#2DD4BF"
+    stroke-width="20"
+    stroke-linecap="round"
+    opacity="0.68"
+  />
 </svg>
