@@ -237,6 +237,22 @@
     }
   }
 
+  // Intro loaders/preloaders (ubiquitous on animated portfolio sites) lock
+  // scrolling while they play — overflow:hidden or position:fixed on
+  // html/body — and only release it seconds after the load event. Scrolling
+  // during the lock is eaten or reset, so the revisit has to wait it out.
+  function scrollLocked() {
+    const de = document.documentElement;
+    const b = document.body;
+    if (!b) return true;
+    if (getComputedStyle(de).overflowY === "hidden") return true;
+    const bs = getComputedStyle(b);
+    if (bs.overflowY === "hidden" || bs.position === "fixed") return true;
+    // Nothing to scroll yet — either a genuinely short page (harmless to
+    // treat as locked; it needs no scrolling) or content not mounted yet.
+    return scrollableHeight() <= window.innerHeight + 4;
+  }
+
   function findTextMatches(needle) {
     const { text, map } = buildTextIndex(document.body, { lowercase: true });
     const matches = [];
@@ -392,13 +408,28 @@
       return null;
     };
 
-    // 1. Text anchor. Poll: client-rendered/animated pages often mount their
-    //    content well after the load event.
-    if (needle.length >= 4) {
-      const deadline = performance.now() + 5000;
-      while (performance.now() < deadline && !userTookOver) {
+    // 1. Text anchor. One combined wait loop covers both delays a page can
+    //    impose after the load event: content that mounts late
+    //    (client-rendered) and intro loaders that keep the page scroll-locked
+    //    while they play. We only commit to scrolling once the text is
+    //    visibly there AND the lock has been released for a beat (loaders
+    //    often reset scroll or play an entry animation right as they exit).
+    //    Pages with no loader and text already present exit this loop on the
+    //    first pass.
+    const deadline = performance.now() + 15000;
+    let unlockedAt = null;
+    while (performance.now() < deadline && !userTookOver) {
+      const locked = scrollLocked();
+      if (!locked && unlockedAt == null) unlockedAt = performance.now();
+      const settledUnlock = unlockedAt != null && performance.now() - unlockedAt >= 350;
+
+      if (needle.length >= 4) {
         const matches = findTextMatches(needle);
-        if (matches.length) {
+        if (matches.length && unlockedAt != null) {
+          if (!settledUnlock) {
+            await sleep(400); // just unlocked — let the exit animation land
+            if (userTookOver) return;
+          }
           const best = pickBest(matches, rangeDocY, expectedY());
           const done = await scrollToDocY(() => rangeDocY(best));
           if (done) {
@@ -408,8 +439,14 @@
           }
           return;
         }
-        await sleep(500);
+        // Text never appearing on an already-unlocked page: stop waiting
+        // after a reasonable search window and use the fallbacks below.
+        if (settledUnlock && performance.now() - unlockedAt > 5000) break;
+      } else {
+        // No usable text anchor — we only needed to wait out the lock.
+        if (settledUnlock) break;
       }
+      await sleep(400);
     }
     if (userTookOver) return;
 

@@ -59,10 +59,14 @@ chrome.tabs.create(beacon.url)   ← URL opened EXACTLY as captured, including
     chrome.scripting and retry once
   → content.js revisitAnchor() then owns everything:
     1. TEXT: search the rendered page for selectedText/snippet using a
-       normalized cross-node character index (buildTextIndex); polls up to
-       5s for late-rendering content; validates matches are visible;
-       when the text occurs multiple times, picks the occurrence closest
-       to scrollYRatio × page height
+       normalized cross-node character index (buildTextIndex); validates
+       matches are visible; when the text occurs multiple times, picks the
+       occurrence closest to scrollYRatio × page height. A combined wait
+       loop (15s cap) covers late-mounting content AND intro loaders that
+       scroll-lock the page (scrollLocked(): overflow:hidden /
+       position:fixed on html/body, or nothing scrollable yet) — it only
+       commits once the text is visible and the lock has been released for
+       a beat, since loaders often reset scroll as they exit
     2. SELECTOR: document.querySelector(beacon.selector), if it resolves
        to a visible element
     3. POSITION: scrollYRatio × current scrollable height (ratio, not raw
