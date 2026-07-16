@@ -114,6 +114,7 @@ async function handleSave() {
       snippet: anchorInfo.snippet || "",
       scrollX: anchorInfo.scrollX || 0,
       scrollY: anchorInfo.scrollY || 0,
+      scrollYRatio: anchorInfo.scrollYRatio || 0,
       screenshotDataUrl,
       createdByName,
     });

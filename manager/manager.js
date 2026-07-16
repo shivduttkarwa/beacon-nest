@@ -338,20 +338,35 @@ async function goToBeacon(b) {
   const targetUrl = beaconnestBuildTargetUrl(b);
   const tab = await chrome.tabs.create({ url: targetUrl });
 
-  if (!b.selectedText && (b.selector || b.scrollY)) {
-    const listener = (tabId, info) => {
-      if (tabId === tab.id && info.status === "complete") {
-        chrome.tabs.onUpdated.removeListener(listener);
-        chrome.tabs
-          .sendMessage(tabId, {
-            type: "BEACONNEST_SCROLL_TO",
-            payload: { selector: b.selector, scrollX: b.scrollX, scrollY: b.scrollY },
-          })
-          .catch(() => {});
+  // content.js owns the whole revisit (text search → selector → scroll
+  // ratio, with its own waiting/retry for late-rendering content), so all we
+  // do is hand it the beacon's anchor data once the page finishes loading.
+  const payload = {
+    selectedText: b.selectedText,
+    snippet: b.snippet,
+    selector: b.selector,
+    scrollX: b.scrollX,
+    scrollY: b.scrollY,
+    scrollYRatio: b.scrollYRatio,
+  };
+
+  const listener = async (tabId, info) => {
+    if (tabId !== tab.id || info.status !== "complete") return;
+    chrome.tabs.onUpdated.removeListener(listener);
+    try {
+      await chrome.tabs.sendMessage(tabId, { type: "BEACONNEST_SCROLL_TO", payload });
+    } catch (e) {
+      // Content script not there (e.g. extension was reloaded after the tab
+      // opened) — inject it and retry once, same pattern as the popup.
+      try {
+        await chrome.scripting.executeScript({ target: { tabId }, files: ["content.js"] });
+        await chrome.tabs.sendMessage(tabId, { type: "BEACONNEST_SCROLL_TO", payload });
+      } catch (e2) {
+        /* page we can't script (chrome://, store) — nothing more to do */
       }
-    };
-    chrome.tabs.onUpdated.addListener(listener);
-  }
+    }
+  };
+  chrome.tabs.onUpdated.addListener(listener);
 }
 
 function applyFilter() {

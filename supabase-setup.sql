@@ -26,6 +26,7 @@ create table if not exists public.beacons (
   snippet text,
   scroll_x integer default 0,
   scroll_y integer default 0,
+  scroll_y_ratio double precision default 0,  -- scroll_y / max scrollable height at save time
   screenshot_path text,               -- path inside the 'screenshots' storage bucket
   created_by uuid references auth.users(id),
   created_by_email text,               -- convenience for display, avoids extra joins
@@ -34,8 +35,9 @@ create table if not exists public.beacons (
   updated_at timestamptz not null default now()
 );
 
--- Upgrading an existing table that predates the created_by_name column.
+-- Upgrading an existing table that predates these columns.
 alter table public.beacons add column if not exists created_by_name text;
+alter table public.beacons add column if not exists scroll_y_ratio double precision default 0;
 
 alter table public.beacons enable row level security;
 

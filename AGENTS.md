@@ -49,15 +49,41 @@ popup click
 
 Revisit flow ("Go there" in manager.js):
 ```
-beaconnestBuildTargetUrl(beacon)
-  → if beacon had a text selection: appends #:~:text=<encoded text>
-    (native browser scroll-to-text, no content script involvement)
-  → chrome.tabs.create(url)
-  → if there was NO text selection (selector/scroll fallback case only):
-    listen for tab onUpdated status:'complete', then message content.js
-    to querySelector(beacon.selector) and scrollIntoView, or fall back
-    to raw scrollX/scrollY if the selector no longer resolves
+chrome.tabs.create(beacon.url)   ← URL opened EXACTLY as captured, including
+                                   the page's own #hash (hash-routed SPAs
+                                   need it to land on the right view)
+  → on tab onUpdated status:'complete', send BEACONNEST_SCROLL_TO to
+    content.js with the full anchor payload (selectedText, snippet,
+    selector, scrollX/Y, scrollYRatio); if the message fails (content
+    script missing, e.g. extension reloaded), inject content.js via
+    chrome.scripting and retry once
+  → content.js revisitAnchor() then owns everything:
+    1. TEXT: search the rendered page for selectedText/snippet using a
+       normalized cross-node character index (buildTextIndex); polls up to
+       5s for late-rendering content; validates matches are visible;
+       when the text occurs multiple times, picks the occurrence closest
+       to scrollYRatio × page height
+    2. SELECTOR: document.querySelector(beacon.selector), if it resolves
+       to a visible element
+    3. POSITION: scrollYRatio × current scrollable height (ratio, not raw
+       pixels — page height differs between visits), else raw scrollY
+    All three scroll via an ANIMATED sweep (not an instant jump) with
+    settle-and-correct passes, then flash an overlay highlight.
 ```
+
+Why content.js owns the revisit (not native #:~:text= fragments, which a
+previous iteration used): this tool's primary use case is bookmarking spots
+on heavily animated/inspiration-style sites and non-English pages, and
+native text fragments fail there in several ways — word-boundary matching
+rules break CJK and other languages, split-text animations (one span per
+character) defeat matching, only the first occurrence is ever targeted,
+failure is silent, and the instant jump skips past scroll-reveal animations
+so sections that reveal on scroll stay invisible and the page looks broken.
+The in-page finder in content.js addresses each of those: plain substring
+matching over a normalized character index (no word boundaries, spans
+irrelevant), occurrence disambiguation by saved position, explicit fallback
+when no match, and an animated scroll that fires real scroll events along
+the way so IntersectionObserver / GSAP ScrollTrigger reveals run normally.
 
 ## File map
 
@@ -65,7 +91,7 @@ beaconnestBuildTargetUrl(beacon)
 |---|---|
 | `manifest.json` | MV3 config. Note `content_security_policy.extension_pages` explicitly allows `connect-src` to `*.supabase.co` (https + wss) — required for the Postgres/Storage/Realtime calls from popup and manager pages. |
 | `background.js` | Near-empty service worker. All actual logic lives in popup/manager since they have tab context; kept only because MV3 requires a service worker to be declared. |
-| `content.js` | Injected on every page (`document_idle`, `<all_urls>`). Two message handlers: `BEACONNEST_GET_ANCHOR` (returns selector/scroll/selection info) and `BEACONNEST_SCROLL_TO` (used on revisit). Guards against double-injection with `window.__beaconnestInjected`. |
+| `content.js` | Injected on every page (`document_idle`, `<all_urls>`). Two message handlers: `BEACONNEST_GET_ANCHOR` (capture: visible-text snippet via `caretRangeFromPoint` + visible-subtree walk, CSS selector, scroll ratio) and `BEACONNEST_SCROLL_TO` (revisit: in-page text search over a normalized cross-node character index → selector → scroll-ratio fallback, all via animated scroll with settle-correction, overlay highlight, and user-takeover abort — see "Revisit flow" above). Guards against double-injection with `window.__beaconnestInjected`. |
 | `lib/vendor/supabase.js` | Vendored Supabase JS UMD bundle. Don't hand-edit; replace wholesale if upgrading. |
 | `lib/config.js` | Reads/writes `{url, anonKey}` to `chrome.storage.local` under key `beaconnestSupabaseConfig`. Creates and caches the Supabase client (`beaconnestGetClient()`). Auth helpers: `beaconnestSignIn`, `beaconnestSignOut`, `beaconnestGetSession`. Also owns the per-install display name (`beaconnestGetUserName`/`beaconnestSetUserName`, stored under `beaconnestUserName`) — independent of Supabase auth, kept simple deliberately. Session persistence relies on each extension page's own `localStorage` (popup and manager are separate stable origins within the extension — this works, but note popup's localStorage session and manager's are technically separate storage areas that both point at the same Supabase project; Supabase's client re-validates via refresh token so this hasn't caused issues, but keep in mind if adding a third context, e.g. background). |
 | `lib/data.js` | All Postgres/Storage/Realtime calls. Beacon rows use snake_case in the DB (`selected_text`, `scroll_x`, `created_by_name`, etc.) and are mapped to camelCase JS objects via `beaconnestRowToBeacon()`. **Always go through this mapping function** — don't read raw Supabase rows elsewhere. |
@@ -90,7 +116,7 @@ beaconnestBuildTargetUrl(beacon)
 - **RLS is owner-only for write, shared for read.** Every authenticated user can read every beacon, but `update`/`delete` policies on both `beacons` and `storage.objects` require `created_by = auth.uid()` (see `supabase-setup.sql`). The manager UI mirrors this: `manager.js` compares `beacon.createdBy` to the signed-in user's id and only renders the Delete button / editable note textarea for the owner. There's no admin override yet — nobody can moderate someone else's beacon; would need a roles/admin table if that's ever needed.
 - **No pagination.** `beaconnestGetAllBeacons()` fetches the entire table every time the manager page loads. Fine at dozens/hundreds of beacons; would need pagination or virtualization well before thousands.
 - **Full-page screenshots aren't supported** — only the visible viewport (`chrome.tabs.captureVisibleTab`). This was a deliberate scope cut, documented in `README.md`, not an oversight.
-- **Anchor selector is best-effort**, not guaranteed stable (see `content.js` `buildSelector()` — id if present, else a short `nth-of-type` path capped at 6 levels). Heavily dynamic SPAs may fail to resolve it on revisit; the code already falls back to raw scroll position in that case, so this degrades gracefully rather than breaking.
+- **The CSS selector (`content.js` `buildSelector()`) is best-effort and rarely the thing doing the work anymore.** Revisiting runs content.js's own in-page text search first (see "Revisit flow"); the selector is only consulted when the beacon has no usable text anchor (e.g. centered on an image or canvas with no nearby visible text), and raw scroll ratio after that. Sites that fully hijack scrolling with transform-based fake scroll (Locomotive-style, where `window.scrollY` never changes) remain the one case none of the fallbacks can position correctly — the captured scroll ratio is 0 there and programmatic `window.scrollTo` does nothing visually.
 - **Auth is just email/password**, manually provisioned per user via the Supabase dashboard. No signup UI, no SSO. Deliberate for a 2-person tool; would need rework to onboard more people self-service.
 - **Display name is unverified free text**, stored per-device in `chrome.storage.local` and not tied to the Supabase auth identity. Someone could type any name, and reinstalling/clearing extension storage resets it (they'd just be asked again on next save). Fine for a small trusted team; would need to move to a real profile record (keyed off `auth.users`) if that ever becomes a problem.
 - **Full standalone web dashboard is explicitly out of scope for now** — deferred by the project owner, not forgotten. Today's "manager" page only exists as the extension's options page (`chrome-extension://.../manager/manager.html`), opened via `chrome.runtime.openOptionsPage()` — there is no hosted, publicly-reachable web app version of it yet. If that gets picked back up, expect questions about: framework choice (stay vanilla-JS/no-build to match the extension, or move to a bundled stack), hosting, and whether it replaces `manager/` or lives alongside it.
