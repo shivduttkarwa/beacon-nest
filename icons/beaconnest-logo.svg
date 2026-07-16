@@ -1,47 +1,53 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
   <title id="title">BeaconNest logo</title>
-  <desc id="desc">A glowing beacon pin sitting inside a nest.</desc>
+  <desc id="desc">A polished teal beacon pin with a warm light nested inside.</desc>
   <defs>
-    <linearGradient id="bg" x1="10" y1="8" x2="56" y2="60" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#14A08C"/>
-      <stop offset="0.56" stop-color="#0F7B6C"/>
-      <stop offset="1" stop-color="#084A45"/>
+    <linearGradient id="mark" x1="14" y1="8" x2="50" y2="58" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18B69F"/>
+      <stop offset="0.48" stop-color="#0F7B6C"/>
+      <stop offset="1" stop-color="#063E3A"/>
     </linearGradient>
-    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="matrix(0 21 -21 0 32 25)" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F8E7A4" stop-opacity="0.78"/>
-      <stop offset="0.62" stop-color="#F8E7A4" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#F8E7A4" stop-opacity="0"/>
+    <radialGradient id="light" cx="0" cy="0" r="1" gradientTransform="matrix(0 18 -18 0 32 25)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF9CC"/>
+      <stop offset="0.34" stop-color="#F8D75E" stop-opacity="0.95"/>
+      <stop offset="1" stop-color="#F8D75E" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="pin" x1="22" y1="13" x2="43" y2="48" gradientUnits="userSpaceOnUse">
+    <linearGradient id="gold" x1="24" y1="18" x2="43" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF2A8"/>
+      <stop offset="0.54" stop-color="#F8D75E"/>
+      <stop offset="1" stop-color="#CF8D2C"/>
+    </linearGradient>
+    <linearGradient id="cream" x1="21" y1="34" x2="45" y2="47" gradientUnits="userSpaceOnUse">
       <stop stop-color="#FFFFFF"/>
-      <stop offset="1" stop-color="#F3F0E7"/>
+      <stop offset="1" stop-color="#F4EFE1"/>
     </linearGradient>
-    <linearGradient id="nest" x1="15" y1="44" x2="50" y2="54" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#F4D35E"/>
-      <stop offset="0.5" stop-color="#FFE9A1"/>
-      <stop offset="1" stop-color="#D79F39"/>
-    </linearGradient>
-    <filter id="shadow" x="9" y="8" width="46" height="48" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#063A35" flood-opacity="0.32"/>
+    <filter id="lift" x="5" y="2" width="54" height="60" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.4" flood-color="#062F2D" flood-opacity="0.34"/>
     </filter>
   </defs>
 
-  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
-  <circle cx="32" cy="25" r="21" fill="url(#halo)"/>
-
-  <path d="M32 8.5v5.25" stroke="#F8E7A4" stroke-linecap="round" stroke-width="3"/>
-  <path d="M18.5 14.5l3.7 3.7" stroke="#F8E7A4" stroke-linecap="round" stroke-width="2.6" opacity="0.72"/>
-  <path d="M45.5 14.5l-3.7 3.7" stroke="#F8E7A4" stroke-linecap="round" stroke-width="2.6" opacity="0.72"/>
-
   <path
-    d="M32 12.5c-8.2 0-14.75 6.35-14.75 14.2 0 10.75 14.75 22.9 14.75 22.9s14.75-12.15 14.75-22.9c0-7.85-6.55-14.2-14.75-14.2Z"
-    fill="url(#pin)"
-    filter="url(#shadow)"
+    d="M32 4.5c-12.65 0-22.75 9.7-22.75 21.75 0 14.05 15.7 27.45 22.75 32.75 7.05-5.3 22.75-18.7 22.75-32.75C54.75 14.2 44.65 4.5 32 4.5Z"
+    fill="url(#mark)"
+    filter="url(#lift)"
   />
-  <circle cx="32" cy="26.35" r="6.75" fill="#0F7B6C"/>
-  <circle cx="32" cy="26.35" r="3.05" fill="#F8D75E"/>
+  <path
+    d="M32 8.75c-10.25 0-18.55 7.75-18.55 17.45 0 10.9 10.6 22 18.55 28.55 7.95-6.55 18.55-17.65 18.55-28.55 0-9.7-8.3-17.45-18.55-17.45Z"
+    fill="none"
+    stroke="#FFFFFF"
+    stroke-opacity="0.18"
+    stroke-width="1.5"
+  />
 
-  <path d="M15.5 44.5c5.7 5.5 27.3 5.5 33 0" stroke="url(#nest)" stroke-linecap="round" stroke-width="4"/>
-  <path d="M19 49.5c4.6 3.8 21.4 3.8 26 0" stroke="#FFE7A3" stroke-linecap="round" stroke-width="3" opacity="0.92"/>
-  <path d="M23.5 53c3 1.8 14 1.8 17 0" stroke="#DFA33A" stroke-linecap="round" stroke-width="2.6" opacity="0.9"/>
+  <circle cx="32" cy="25" r="18" fill="url(#light)"/>
+  <path d="M31.95 12.25l4.9 11.3h-9.8l4.9-11.3Z" fill="#FFF4B8" opacity="0.92"/>
+  <path d="M19.4 20.15l9.6 5.1-7.8 4.6-1.8-9.7Z" fill="#FFF2A8" opacity="0.38"/>
+  <path d="M44.6 20.15l-9.6 5.1 7.8 4.6 1.8-9.7Z" fill="#FFF2A8" opacity="0.38"/>
+
+  <circle cx="32" cy="25.5" r="8.6" fill="url(#gold)"/>
+  <circle cx="32" cy="25.5" r="3.6" fill="#FFFCE2"/>
+
+  <path d="M23.4 37.2c3.7-3.75 13.5-3.75 17.2 0" stroke="url(#cream)" stroke-linecap="round" stroke-width="4.5"/>
+  <path d="M18.8 42.15c5.85 6.65 20.55 6.65 26.4 0" stroke="url(#cream)" stroke-linecap="round" stroke-width="4.3"/>
+  <path d="M22.85 48.2c4.65 3.3 13.65 3.3 18.3 0" stroke="url(#gold)" stroke-linecap="round" stroke-width="3.6"/>
 </svg>
