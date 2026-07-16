@@ -330,7 +330,6 @@ body {
     transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .card:hover {
-  transform: translateY(-3px);
   box-shadow:
     0 1px 1px rgba(30, 24, 90, 0.04),
     0 16px 32px -12px rgba(67, 56, 202, 0.28),
