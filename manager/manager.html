@@ -15,10 +15,24 @@
         <h1>BeaconNest</h1>
       </div>
       <div class="top__actions">
-        <input id="search" type="search" placeholder="Search title, note, or URL…" />
-        <select id="personFilter" title="Filter by who saved it">
-          <option value="">All people</option>
-        </select>
+        <div class="search-field">
+          <svg class="search-field__icon" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <circle cx="9" cy="9" r="6.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M14 14L18 18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+          </svg>
+          <input id="search" type="search" placeholder="Search title, note, or URL…" />
+        </div>
+
+        <div class="dropdown" id="personDropdown">
+          <button type="button" id="personDropdownTrigger" class="dropdown__trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span id="personDropdownLabel">All people</span>
+            <svg class="dropdown__chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <ul id="personDropdownMenu" class="dropdown__menu hidden" role="listbox" tabindex="-1"></ul>
+        </div>
+
         <button id="exportBtn" class="ghost-btn">Export CSV</button>
         <button id="settingsToggle" class="ghost-btn">Connection</button>
       </div>

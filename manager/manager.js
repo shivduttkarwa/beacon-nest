@@ -3,7 +3,10 @@ const empty = document.getElementById("empty");
 const notConnected = document.getElementById("notConnected");
 const countEl = document.getElementById("count");
 const searchEl = document.getElementById("search");
-const personFilterEl = document.getElementById("personFilter");
+const personDropdown = document.getElementById("personDropdown");
+const personDropdownTrigger = document.getElementById("personDropdownTrigger");
+const personDropdownLabel = document.getElementById("personDropdownLabel");
+const personDropdownMenu = document.getElementById("personDropdownMenu");
 const exportBtn = document.getElementById("exportBtn");
 
 const settingsToggle = document.getElementById("settingsToggle");
@@ -29,6 +32,15 @@ const signOutBtn = document.getElementById("signOutBtn");
 let allBeacons = [];
 let filtered = [];
 let unsubscribeRealtime = null;
+let selectedPerson = "";
+
+const PERSON_HUES = [252, 168, 12, 292, 200, 42, 330, 96];
+function personColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  const hue = PERSON_HUES[hash % PERSON_HUES.length];
+  return `hsl(${hue} 70% 50%)`;
+}
 
 function fmtDate(iso) {
   try {
@@ -48,25 +60,92 @@ function personLabel(b) {
   return b.createdByName || b.createdByEmail || "";
 }
 
-function populatePersonFilter() {
-  const current = personFilterEl.value;
-  const names = Array.from(new Set(allBeacons.map(personLabel).filter(Boolean))).sort();
+function checkIcon() {
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 20 20");
+  svg.setAttribute("fill", "none");
+  svg.classList.add("dropdown__option-check");
+  const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  path.setAttribute("d", "M4 10.5L8 14.5L16 6");
+  path.setAttribute("stroke", "currentColor");
+  path.setAttribute("stroke-width", "2");
+  path.setAttribute("stroke-linecap", "round");
+  path.setAttribute("stroke-linejoin", "round");
+  svg.appendChild(path);
+  return svg;
+}
 
-  personFilterEl.innerHTML = "";
-  const allOpt = document.createElement("option");
-  allOpt.value = "";
-  allOpt.textContent = "All people";
-  personFilterEl.appendChild(allOpt);
+function buildPersonOption(name, label) {
+  const li = document.createElement("li");
+  li.className = "dropdown__option";
+  li.setAttribute("role", "option");
+  li.dataset.value = name;
+  li.setAttribute("aria-selected", String(selectedPerson === name));
 
-  for (const name of names) {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    personFilterEl.appendChild(opt);
+  if (name) {
+    const dot = document.createElement("span");
+    dot.className = "dropdown__option-dot";
+    dot.style.background = personColor(name);
+    li.appendChild(dot);
   }
 
-  personFilterEl.value = names.includes(current) ? current : "";
+  const text = document.createElement("span");
+  text.textContent = label;
+  li.appendChild(text);
+  li.appendChild(checkIcon());
+
+  li.addEventListener("click", () => setSelectedPerson(name));
+  return li;
 }
+
+function populatePersonFilter() {
+  const names = Array.from(new Set(allBeacons.map(personLabel).filter(Boolean))).sort();
+  if (!names.includes(selectedPerson)) selectedPerson = "";
+
+  personDropdownMenu.innerHTML = "";
+  personDropdownMenu.appendChild(buildPersonOption("", "All people"));
+  for (const name of names) {
+    personDropdownMenu.appendChild(buildPersonOption(name, name));
+  }
+
+  personDropdownLabel.textContent = selectedPerson || "All people";
+}
+
+function setSelectedPerson(name) {
+  selectedPerson = name;
+  personDropdownLabel.textContent = name || "All people";
+  personDropdownMenu.querySelectorAll(".dropdown__option").forEach((opt) => {
+    opt.setAttribute("aria-selected", String(opt.dataset.value === name));
+  });
+  closePersonDropdown();
+  applyFilter();
+}
+
+function openPersonDropdown() {
+  personDropdownMenu.classList.remove("hidden");
+  personDropdown.dataset.open = "true";
+  personDropdownTrigger.setAttribute("aria-expanded", "true");
+}
+
+function closePersonDropdown() {
+  personDropdownMenu.classList.add("hidden");
+  personDropdown.dataset.open = "false";
+  personDropdownTrigger.setAttribute("aria-expanded", "false");
+}
+
+personDropdownTrigger.addEventListener("click", () => {
+  const isOpen = personDropdown.dataset.open === "true";
+  if (isOpen) closePersonDropdown();
+  else openPersonDropdown();
+});
+
+document.addEventListener("click", (e) => {
+  if (!personDropdown.contains(e.target)) closePersonDropdown();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closePersonDropdown();
+});
 
 async function render() {
   grid.innerHTML = "";
@@ -131,8 +210,21 @@ async function render() {
 
     const meta = document.createElement("div");
     meta.className = "card__meta";
-    const who = personLabel(b) ? ` · ${personLabel(b)}` : "";
-    meta.textContent = `Saved ${fmtDate(b.createdAt)}${who}`;
+    const savedText = document.createElement("span");
+    savedText.textContent = `Saved ${fmtDate(b.createdAt)}`;
+    meta.appendChild(savedText);
+    const who = personLabel(b);
+    if (who) {
+      meta.appendChild(document.createTextNode("·"));
+      const person = document.createElement("span");
+      person.className = "card__person";
+      const dot = document.createElement("span");
+      dot.className = "card__person-dot";
+      dot.style.background = personColor(who);
+      person.appendChild(dot);
+      person.appendChild(document.createTextNode(who));
+      meta.appendChild(person);
+    }
 
     const hint = document.createElement("span");
     hint.className = "save-hint";
@@ -200,7 +292,7 @@ async function goToBeacon(b) {
 
 function applyFilter() {
   const q = searchEl.value.trim();
-  const person = personFilterEl.value;
+  const person = selectedPerson;
   filtered = allBeacons.filter((b) => matchesQuery(b, q) && (!person || personLabel(b) === person));
   render();
 }
@@ -335,7 +427,6 @@ signOutBtn.addEventListener("click", async () => {
 });
 
 searchEl.addEventListener("input", applyFilter);
-personFilterEl.addEventListener("change", applyFilter);
 
 exportBtn.addEventListener("click", () => {
   const csv = beaconnestToCSV(allBeacons);
