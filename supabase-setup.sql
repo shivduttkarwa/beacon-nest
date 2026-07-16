@@ -21,6 +21,7 @@ create table if not exists public.beacons (
   title text,
   url text not null,
   description text default '',
+  category text default 'general',    -- slug from BEACONNEST_CATEGORIES in lib/data.js
   selector text,
   selected_text text,
   snippet text,
@@ -38,6 +39,7 @@ create table if not exists public.beacons (
 -- Upgrading an existing table that predates these columns.
 alter table public.beacons add column if not exists created_by_name text;
 alter table public.beacons add column if not exists scroll_y_ratio double precision default 0;
+alter table public.beacons add column if not exists category text default 'general';
 
 alter table public.beacons enable row level security;
 

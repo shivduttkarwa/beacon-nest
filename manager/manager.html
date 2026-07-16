@@ -23,6 +23,16 @@
           <input id="search" type="search" placeholder="Search title, note, or URL…" />
         </div>
 
+        <div class="dropdown" id="categoryDropdown">
+          <button type="button" id="categoryDropdownTrigger" class="dropdown__trigger" aria-haspopup="listbox" aria-expanded="false">
+            <span id="categoryDropdownLabel">All categories</span>
+            <svg class="dropdown__chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+              <path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <ul id="categoryDropdownMenu" class="dropdown__menu hidden" role="listbox" tabindex="-1"></ul>
+        </div>
+
         <div class="dropdown" id="personDropdown">
           <button type="button" id="personDropdownTrigger" class="dropdown__trigger" aria-haspopup="listbox" aria-expanded="false">
             <span id="personDropdownLabel">All people</span>

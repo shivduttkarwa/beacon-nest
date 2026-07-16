@@ -353,6 +353,19 @@ body {
   display: block;
   cursor: pointer;
 }
+.card__cat {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  box-shadow: 0 1px 4px rgba(30, 24, 90, 0.14);
+  pointer-events: none;
+}
+
 .card__pin {
   position: absolute;
   top: 50%;

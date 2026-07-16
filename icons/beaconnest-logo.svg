@@ -1,4 +1,7 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<!-- viewBox is cropped to the artwork bounds (not 0 0 512 512) so the mark
+     renders at full size wherever the logo is shown; icon PNGs are rendered
+     from this same crop. -->
+<svg width="512" height="512" viewBox="51 57 410 410" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="beaconGradient" x1="126" y1="100" x2="386" y2="412" gradientUnits="userSpaceOnUse">
       <stop stop-color="#6366F1"/>

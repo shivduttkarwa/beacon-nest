@@ -34,7 +34,7 @@
     </div>
 
     <div id="state-name" class="state hidden">
-      <p class="error-text">One quick thing</p>
+      <p class="state-title">One quick thing</p>
       <p class="muted small">What's your name? It's tagged on every beacon you save, so teammates know who left it — and you can filter by it later.</p>
       <input id="nameInput" type="text" class="name-input" placeholder="e.g. Priya" maxlength="60" />
       <button id="saveNameBtn" class="primary-btn">Continue</button>
@@ -56,8 +56,20 @@
         <p id="anchorSnippet" class="anchor-snippet"></p>
       </div>
 
+      <label class="field-label" id="categoryLabel">Category</label>
+      <div class="dropdown" id="categoryDropdown">
+        <button type="button" id="categoryTrigger" class="dropdown__trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="categoryLabel">
+          <span id="categoryDot" class="dropdown__dot" aria-hidden="true"></span>
+          <span id="categoryValue">General</span>
+          <svg class="dropdown__chevron" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+            <path d="M5.5 8L10 12.5L14.5 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <ul id="categoryMenu" class="dropdown__menu hidden" role="listbox" tabindex="-1"></ul>
+      </div>
+
       <label class="field-label" for="description">Note <span class="muted">(editable anytime)</span></label>
-      <textarea id="description" rows="3" placeholder="What's here? e.g. &quot;Pricing table, compare row&quot;"></textarea>
+      <textarea id="description" rows="3" placeholder="What's here? e.g. &quot;Hero reveal animation&quot;"></textarea>
 
       <button id="saveBtn" class="primary-btn">Save this beacon</button>
       <p id="savedMsg" class="saved-msg hidden">Saved ✓</p>

@@ -7,6 +7,10 @@ const personDropdown = document.getElementById("personDropdown");
 const personDropdownTrigger = document.getElementById("personDropdownTrigger");
 const personDropdownLabel = document.getElementById("personDropdownLabel");
 const personDropdownMenu = document.getElementById("personDropdownMenu");
+const categoryDropdown = document.getElementById("categoryDropdown");
+const categoryDropdownTrigger = document.getElementById("categoryDropdownTrigger");
+const categoryDropdownLabel = document.getElementById("categoryDropdownLabel");
+const categoryDropdownMenu = document.getElementById("categoryDropdownMenu");
 const exportBtn = document.getElementById("exportBtn");
 
 const modalOverlay = document.getElementById("modalOverlay");
@@ -76,7 +80,15 @@ let allBeacons = [];
 let filtered = [];
 let unsubscribeRealtime = null;
 let selectedPerson = "";
+let selectedCategoryFilter = "";
 let currentUserId = null;
+
+function categoryColor(cat) {
+  return `hsl(${cat.hue} 70% 45%)`;
+}
+function categoryBg(cat) {
+  return `hsl(${cat.hue} 85% 95%)`;
+}
 
 const PERSON_HUES = [252, 168, 12, 292, 200, 42, 330, 96];
 function personColor(name) {
@@ -185,11 +197,90 @@ personDropdownTrigger.addEventListener("click", () => {
 
 document.addEventListener("click", (e) => {
   if (!personDropdown.contains(e.target)) closePersonDropdown();
+  if (!categoryDropdown.contains(e.target)) closeCategoryDropdown();
 });
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closePersonDropdown();
+  if (e.key === "Escape") {
+    closePersonDropdown();
+    closeCategoryDropdown();
+  }
 });
+
+// --- Category filter dropdown (mirrors the person filter) -----------------
+
+function buildCategoryOption(slug, label, hue) {
+  const li = document.createElement("li");
+  li.className = "dropdown__option";
+  li.setAttribute("role", "option");
+  li.dataset.value = slug;
+  li.setAttribute("aria-selected", String(selectedCategoryFilter === slug));
+
+  if (slug) {
+    const dot = document.createElement("span");
+    dot.className = "dropdown__option-dot";
+    dot.style.background = `hsl(${hue} 70% 50%)`;
+    li.appendChild(dot);
+  }
+
+  const text = document.createElement("span");
+  text.textContent = label;
+  li.appendChild(text);
+  li.appendChild(checkIcon());
+
+  li.addEventListener("click", () => setSelectedCategoryFilter(slug));
+  return li;
+}
+
+function populateCategoryFilter() {
+  const present = new Set(allBeacons.map((b) => b.category || "general"));
+  if (selectedCategoryFilter && !present.has(selectedCategoryFilter)) selectedCategoryFilter = "";
+
+  categoryDropdownMenu.innerHTML = "";
+  categoryDropdownMenu.appendChild(buildCategoryOption("", "All categories", 0));
+  for (const cat of BEACONNEST_CATEGORIES) {
+    if (present.has(cat.slug)) {
+      categoryDropdownMenu.appendChild(buildCategoryOption(cat.slug, cat.label, cat.hue));
+    }
+  }
+
+  categoryDropdownLabel.textContent = selectedCategoryFilter
+    ? beaconnestCategory(selectedCategoryFilter).label
+    : "All categories";
+}
+
+function setSelectedCategoryFilter(slug) {
+  selectedCategoryFilter = slug;
+  categoryDropdownLabel.textContent = slug ? beaconnestCategory(slug).label : "All categories";
+  categoryDropdownMenu.querySelectorAll(".dropdown__option").forEach((opt) => {
+    opt.setAttribute("aria-selected", String(opt.dataset.value === slug));
+  });
+  closeCategoryDropdown();
+  applyFilter();
+}
+
+function closeCategoryDropdown() {
+  categoryDropdownMenu.classList.add("hidden");
+  categoryDropdown.dataset.open = "false";
+  categoryDropdownTrigger.setAttribute("aria-expanded", "false");
+}
+
+categoryDropdownTrigger.addEventListener("click", () => {
+  const isOpen = categoryDropdown.dataset.open === "true";
+  if (isOpen) {
+    closeCategoryDropdown();
+  } else {
+    categoryDropdownMenu.classList.remove("hidden");
+    categoryDropdown.dataset.open = "true";
+    categoryDropdownTrigger.setAttribute("aria-expanded", "true");
+  }
+});
+
+// Both header filters are rebuilt together whenever the beacon list changes.
+function refreshFilters() {
+  populatePersonFilter();
+  populateCategoryFilter();
+}
 
 async function render() {
   grid.innerHTML = "";
@@ -215,6 +306,14 @@ async function render() {
     const pin = document.createElement("span");
     pin.className = "card__pin";
     thumbWrap.appendChild(pin);
+
+    const cat = beaconnestCategory(b.category);
+    const catChip = document.createElement("span");
+    catChip.className = "card__cat";
+    catChip.textContent = cat.label;
+    catChip.style.color = categoryColor(cat);
+    catChip.style.background = categoryBg(cat);
+    thumbWrap.appendChild(catChip);
     thumbWrap.addEventListener("click", () => goToBeacon(b));
 
     beaconnestScreenshotUrl(b.screenshotPath).then((url) => {
@@ -311,7 +410,7 @@ async function render() {
         try {
           await beaconnestDeleteBeacon(b.id, b.screenshotPath);
           allBeacons = allBeacons.filter((x) => x.id !== b.id);
-          populatePersonFilter();
+          refreshFilters();
           applyFilter();
         } catch (err) {
           console.error("BeaconNest delete failed:", err);
@@ -372,7 +471,13 @@ async function goToBeacon(b) {
 function applyFilter() {
   const q = searchEl.value.trim();
   const person = selectedPerson;
-  filtered = allBeacons.filter((b) => matchesQuery(b, q) && (!person || personLabel(b) === person));
+  const cat = selectedCategoryFilter;
+  filtered = allBeacons.filter(
+    (b) =>
+      matchesQuery(b, q) &&
+      (!person || personLabel(b) === person) &&
+      (!cat || (b.category || "general") === cat)
+  );
   render();
 }
 
@@ -383,17 +488,17 @@ function handleRealtimeChange(eventType, newRow, oldRow) {
     const b = beaconnestRowToBeacon(newRow);
     if (!allBeacons.some((x) => x.id === b.id)) {
       allBeacons.unshift(b);
-      populatePersonFilter();
+      refreshFilters();
       applyFilter();
     }
   } else if (eventType === "UPDATE") {
     const b = beaconnestRowToBeacon(newRow);
     allBeacons = allBeacons.map((x) => (x.id === b.id ? b : x));
-    populatePersonFilter();
+    refreshFilters();
     applyFilter();
   } else if (eventType === "DELETE") {
     allBeacons = allBeacons.filter((x) => x.id !== oldRow.id);
-    populatePersonFilter();
+    refreshFilters();
     applyFilter();
   }
 }
@@ -440,7 +545,7 @@ async function refreshConnectionUI() {
 async function loadBeaconsAndSubscribe() {
   try {
     allBeacons = await beaconnestGetAllBeacons();
-    populatePersonFilter();
+    refreshFilters();
     applyFilter();
   } catch (err) {
     console.error("BeaconNest load failed:", err);
