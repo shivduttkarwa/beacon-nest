@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>BeaconNest</title>
+<link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="popup">
+    <header class="popup__header">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">
+          <img src="../icons/beaconnest-logo.svg" alt="" />
+        </span>
+        <span class="brand__name">BeaconNest</span>
+      </div>
+      <button id="manageBtn" class="link-btn" title="View all beacons">All beacons</button>
+    </header>
+
+    <div id="state-loading" class="state">
+      <div class="spinner" aria-hidden="true"></div>
+      <p class="muted">Reading the page and framing the shot…</p>
+    </div>
+
+    <div id="state-error" class="state hidden">
+      <p class="error-text">BeaconNest can't capture this page.</p>
+      <p class="muted small">Browser-internal pages (like chrome:// tabs) and the Chrome Web Store can't be captured by extensions.</p>
+    </div>
+
+    <div id="state-signin" class="state hidden">
+      <p class="error-text">Not connected yet.</p>
+      <p class="muted small">Add your Supabase project details and sign in from the "All beacons" page before saving beacons.</p>
+      <button id="openSettingsBtn" class="primary-btn">Open All beacons</button>
+    </div>
+
+    <div id="state-name" class="state hidden">
+      <p class="error-text">One quick thing</p>
+      <p class="muted small">What's your name? It's tagged on every beacon you save, so teammates know who left it — and you can filter by it later.</p>
+      <input id="nameInput" type="text" class="name-input" placeholder="e.g. Priya" maxlength="60" />
+      <button id="saveNameBtn" class="primary-btn">Continue</button>
+    </div>
+
+    <div id="state-save-error" class="state hidden">
+      <p class="error-text">Couldn't save that beacon.</p>
+      <p id="saveErrorDetail" class="muted small"></p>
+    </div>
+
+    <div id="state-ready" class="state hidden">
+      <div class="thumb-wrap">
+        <img id="thumb" class="thumb" alt="Viewport screenshot" />
+        <span id="anchorPin" class="anchor-pin" title="Approximate anchor point"></span>
+      </div>
+
+      <div class="meta">
+        <p id="pageTitle" class="page-title"></p>
+        <p id="anchorSnippet" class="anchor-snippet"></p>
+      </div>
+
+      <label class="field-label" for="description">Note <span class="muted">(editable anytime)</span></label>
+      <textarea id="description" rows="3" placeholder="What's here? e.g. &quot;Pricing table, compare row&quot;"></textarea>
+
+      <button id="saveBtn" class="primary-btn">Save this beacon</button>
+      <p id="savedMsg" class="saved-msg hidden">Saved ✓</p>
+    </div>
+  </div>
+
+  <script src="../lib/vendor/supabase.js"></script>
+  <script src="../lib/config.js"></script>
+  <script src="../lib/data.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">BeaconNest logo</title>
+  <desc id="desc">A glowing beacon pin sitting inside a nest.</desc>
+  <defs>
+    <linearGradient id="bg" x1="10" y1="8" x2="56" y2="60" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#14A08C"/>
+      <stop offset="0.56" stop-color="#0F7B6C"/>
+      <stop offset="1" stop-color="#084A45"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0" cy="0" r="1" gradientTransform="matrix(0 21 -21 0 32 25)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F8E7A4" stop-opacity="0.78"/>
+      <stop offset="0.62" stop-color="#F8E7A4" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#F8E7A4" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="pin" x1="22" y1="13" x2="43" y2="48" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F3F0E7"/>
+    </linearGradient>
+    <linearGradient id="nest" x1="15" y1="44" x2="50" y2="54" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F4D35E"/>
+      <stop offset="0.5" stop-color="#FFE9A1"/>
+      <stop offset="1" stop-color="#D79F39"/>
+    </linearGradient>
+    <filter id="shadow" x="9" y="8" width="46" height="48" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#063A35" flood-opacity="0.32"/>
+    </filter>
+  </defs>
+
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <circle cx="32" cy="25" r="21" fill="url(#halo)"/>
+
+  <path d="M32 8.5v5.25" stroke="#F8E7A4" stroke-linecap="round" stroke-width="3"/>
+  <path d="M18.5 14.5l3.7 3.7" stroke="#F8E7A4" stroke-linecap="round" stroke-width="2.6" opacity="0.72"/>
+  <path d="M45.5 14.5l-3.7 3.7" stroke="#F8E7A4" stroke-linecap="round" stroke-width="2.6" opacity="0.72"/>
+
+  <path
+    d="M32 12.5c-8.2 0-14.75 6.35-14.75 14.2 0 10.75 14.75 22.9 14.75 22.9s14.75-12.15 14.75-22.9c0-7.85-6.55-14.2-14.75-14.2Z"
+    fill="url(#pin)"
+    filter="url(#shadow)"
+  />
+  <circle cx="32" cy="26.35" r="6.75" fill="#0F7B6C"/>
+  <circle cx="32" cy="26.35" r="3.05" fill="#F8D75E"/>
+
+  <path d="M15.5 44.5c5.7 5.5 27.3 5.5 33 0" stroke="url(#nest)" stroke-linecap="round" stroke-width="4"/>
+  <path d="M19 49.5c4.6 3.8 21.4 3.8 26 0" stroke="#FFE7A3" stroke-linecap="round" stroke-width="3" opacity="0.92"/>
+  <path d="M23.5 53c3 1.8 14 1.8 17 0" stroke="#DFA33A" stroke-linecap="round" stroke-width="2.6" opacity="0.9"/>
+</svg>

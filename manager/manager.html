@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>BeaconNest — All beacons</title>
+<link rel="stylesheet" href="manager.css" />
+</head>
+<body>
+  <div class="wrap">
+    <header class="top">
+      <div class="brand">
+        <span class="brand__mark" aria-hidden="true">
+          <img src="../icons/beaconnest-logo.svg" alt="" />
+        </span>
+        <h1>BeaconNest</h1>
+      </div>
+      <div class="top__actions">
+        <input id="search" type="search" placeholder="Search title, note, or URL…" />
+        <select id="personFilter" title="Filter by who saved it">
+          <option value="">All people</option>
+        </select>
+        <button id="exportBtn" class="ghost-btn">Export CSV</button>
+        <button id="settingsToggle" class="ghost-btn">Connection</button>
+      </div>
+    </header>
+
+    <div id="settingsPanel" class="settings-panel hidden">
+      <div id="settings-name" class="settings-block">
+        <h2>Your name</h2>
+        <p class="muted small">Tagged on every beacon you save, so teammates know who left it — and it powers the "All people" filter above.</p>
+        <div class="settings-row">
+          <input id="userName" type="text" placeholder="e.g. Priya" maxlength="60" />
+          <button id="saveNameBtn" class="primary-btn-sm">Save</button>
+        </div>
+        <p id="nameStatus" class="muted small"></p>
+      </div>
+
+      <div id="settings-config" class="settings-block">
+        <h2>1. Connect to your Supabase project</h2>
+        <p class="muted small">From your Supabase project: Settings → API → copy the Project URL and the anon public key. Both teammates use the same values.</p>
+        <div class="settings-row">
+          <input id="sbUrl" type="text" placeholder="https://xxxxx.supabase.co" />
+          <input id="sbAnonKey" type="text" placeholder="anon public key" />
+          <button id="saveConfigBtn" class="primary-btn-sm">Save</button>
+        </div>
+        <p id="configStatus" class="muted small"></p>
+      </div>
+
+      <div id="settings-auth" class="settings-block hidden">
+        <h2>2. Sign in</h2>
+        <p class="muted small">Ask whoever set up the Supabase project to add an account for you under Authentication → Users.</p>
+        <div class="settings-row">
+          <input id="authEmail" type="email" placeholder="you@example.com" />
+          <input id="authPassword" type="password" placeholder="Password" />
+          <button id="signInBtn" class="primary-btn-sm">Sign in</button>
+        </div>
+        <p id="authStatus" class="muted small"></p>
+      </div>
+
+      <div id="settings-signed-in" class="settings-block hidden">
+        <p class="signed-in-row">
+          Signed in as <strong id="signedInEmail"></strong>
+          <span class="live-dot" title="Live sync connected"></span>
+          <button id="signOutBtn" class="ghost-btn">Sign out</button>
+        </p>
+      </div>
+    </div>
+
+    <p id="count" class="count muted"></p>
+    <div id="notConnected" class="empty hidden">
+      <p>Not connected yet.</p>
+      <p class="muted small">Open <strong>Connection</strong> above to link your Supabase project and sign in — that's what lets you and your colleague see each other's beacons instantly.</p>
+    </div>
+
+    <div id="empty" class="empty hidden">
+      <p>No beacons saved yet.</p>
+      <p class="muted small">Click the BeaconNest icon in your toolbar while on any page to save the exact spot you're looking at.</p>
+    </div>
+
+    <div id="grid" class="grid"></div>
+  </div>
+
+  <script src="../lib/vendor/supabase.js"></script>
+  <script src="../lib/config.js"></script>
+  <script src="../lib/data.js"></script>
+  <script src="manager.js"></script>
+</body>
+</html>
